@@ -1,8 +1,9 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, MinLength } from "class-validator";
 
 // the front end input fields must follow the the structure od these DTO fields
 
 export class CreateUserDto {
+    @IsNumber()
     id: number;
 
     @IsString()
