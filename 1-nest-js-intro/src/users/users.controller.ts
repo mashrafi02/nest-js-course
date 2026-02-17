@@ -1,5 +1,6 @@
-import { Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Post, Query } from "@nestjs/common";
+import { Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Post, Query, ValidationPipe } from "@nestjs/common";
 import { UsersService } from "./users.service";
+import { CreateUserDto } from "./dtos/createUser.dto";
 
 @Controller('users')
 export class UsersController{
@@ -24,11 +25,7 @@ export class UsersController{
     // the 'id' in Param gives us a specific route parameter. if we want all the parameters, just leave the parenthisis empty. that's way we'll get all the route parameters as an single object. this logic is also applicable to query strings 
 
     @Post()
-    createUser(){
-        const user = {id:3, name:'cena', age:40, gender:'male'};
-
-        this.usersService.createUser(user);
-
+    createUser(@Body(new ValidationPipe()) user: CreateUserDto){
         return {
             message:"A new user has been created",
             user
