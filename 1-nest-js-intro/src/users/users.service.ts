@@ -1,42 +1,37 @@
-import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import { AuthService } from "src/auth/auth.service";
+import { Injectable } from "@nestjs/common";
+import { Repository } from "typeorm";
+import { Users } from "./users.entity";
+import { InjectRepository } from "@nestjs/typeorm";
+import { CreateUserDto } from "./dtos/createUser.dto";
 
 
 @Injectable()
 export class UsersService{
 
     constructor(
-        @Inject(forwardRef(() => AuthService))
-        private readonly authService: AuthService
+        @InjectRepository(Users)
+        private readonly usersRepository: Repository<Users>
     ){}
 
-    users: {id:number, name:string, age:number, email:string, gender:string, password:string}[] = [
-        {id:1, name: 'john', age:23, email: 'john@example.com', gender: 'male', password:"test1234"},
-        {id:2, name: 'whick', age:43, email: 'whick@example.com', gender: 'male', password:"test1234"},
-        {id:3, name: 'Selena', age:34, email: 'selena@example.com', gender: 'female', password:"test1234"},
-    ];
 
     getAllUsers(){
-        if(this.authService.isAuthenticated){
-            return this.users;
-        }
-        return "Unauthorized";
+        return this.usersRepository.find()
     }
 
-    getUserById(id: number){
-        return this.users.find(user => user.id === id);
-    }
+    public async createUser(userDto: CreateUserDto) {
+        const user =  await this.usersRepository.findOne({
+            where:{ email: userDto.email }
+        })
 
-    createUser(
-        user: {
-            id:number,
-            name: string,
-            age: number,
-            email: string,
-            gender: string,
-            password: string
+        if(user){
+            return {
+                message: "User already exists"
+            }
         }
-    ) {
-        return this.users.push(user)
+
+        let newUser = this.usersRepository.create(userDto)
+        newUser = await this.usersRepository.save(newUser)
+
+        return newUser
     }
 }
