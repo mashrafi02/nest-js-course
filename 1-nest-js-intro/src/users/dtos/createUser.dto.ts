@@ -1,27 +1,13 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
 
 // the front end input fields must follow the the structure od these DTO fields
 
 export class CreateUserDto {
 
     @IsString()
-    @IsNotEmpty({message: 'Name is required'})
-    @MinLength(3, {message: 'Name must be at least 3 characters long'})
-    @MaxLength(255, {message: 'Name must be less than 255 characters long'})
-    first_name: string;
-
-    @IsString()
-    @IsNotEmpty({message: 'Name is required'})
-    @MinLength(3, {message: 'Name must be at least 3 characters long'})
-    @MaxLength(255, {message: 'Name must be less than 255 characters long'})
-    last_name: string;
-
-    @IsNotEmpty({message: 'Age is required'})
-    age: number;
-
-    @IsString()
-    @IsOptional()
-    gender?: string
+    @IsNotEmpty({message: 'username is required'})
+    @MaxLength(24, {message: 'username must be less than 24 characters long'})
+    username: string;
 
     @IsNotEmpty({message: 'Email is required'})
     @IsEmail({}, {message: 'Invalid email address'})
