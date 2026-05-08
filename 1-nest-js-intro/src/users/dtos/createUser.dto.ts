@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { CreateProfileDto } from "../../profile/dto/createProfile.dto";
 
 // the front end input fields must follow the the structure od these DTO fields
 
@@ -17,4 +18,7 @@ export class CreateUserDto {
     @IsNotEmpty({message: 'Password is required'})
     @MinLength(8, {message: 'Password must be at least 8 characters long'})
     password: string;
+
+    @IsOptional()
+    profile: CreateProfileDto | null;
 }
