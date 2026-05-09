@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Users } from "../users/users.entity";
 
 
 @Entity()
@@ -47,4 +48,7 @@ export class Profile {
         nullable: true
     })
     avatarUrl: string;
+
+    @OneToOne(() => Users, (user) => user.profile)
+    user?: Users
 }

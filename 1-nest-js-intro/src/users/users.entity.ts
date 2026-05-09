@@ -28,9 +28,12 @@ export class Users {
     })
     password: string;
 
-    @OneToOne(() => Profile, {
-        cascade: ['insert', 'remove']
-    })
+    @OneToOne(() => Profile,
+                 (profile) => profile.user, 
+                 {
+                    cascade: ['insert', 'remove'],
+                    // eager: true     ---> this will query all the relations
+                })
     @JoinColumn()
     profile?: Profile;
 
