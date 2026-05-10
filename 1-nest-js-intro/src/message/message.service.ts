@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Message } from './message.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateMessageDto } from './dto/create-message-dto';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class MessageService {
@@ -15,17 +15,26 @@ export class MessageService {
     ) {}
 
 
-    getMesasgeByUserId(userId: number){
-
+    public async getMessageByUserId(userId: number): Promise<Message[]> {
+        return await this.messageRepository.find({
+            where: {
+                user: {
+                    id: userId,
+                },
+            },
+            relations: {
+                user: true,
+            },
+        });
     }
 
     public async CreateMessage(createMessageDto: CreateMessageDto){
-        const user = await this.usersService.FindUserById(createMessageDto.userId);
+        const user = await this.usersService.findUserById(createMessageDto.userId);
         if(!user){
-            throw new Error('User not found');
+            throw new NotFoundException('User not found');
         }    
 
-        let message = await this.messageRepository.create({
+        const message = this.messageRepository.create({
             ...createMessageDto,
             user
         });

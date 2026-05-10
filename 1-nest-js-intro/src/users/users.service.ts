@@ -50,7 +50,7 @@ export class UsersService{
         return this.usersRepository.remove(user);
     }
 
-    public async FindUserById(id: number){
+    public async findUserById(id: number): Promise<Users | null>{
         return await this.usersRepository.findOneBy({ id });
     }
 }

@@ -8,7 +8,7 @@ export class MessageController {
 
     @Get(':userId')
     getMessageByUserId(@Param('userId') userId: number) {
-        return this.messageService.getMesasgeByUserId(userId);
+        return this.messageService.getMessageByUserId(userId);
     }
 
     @Post()
