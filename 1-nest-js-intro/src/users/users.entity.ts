@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Profile } from "../profile/profile.entity";
+import { Message } from "../message/message.entity";
 
 
 @Entity()
@@ -36,6 +37,9 @@ export class Users {
                 })
     @JoinColumn()
     profile?: Profile;
+
+    @OneToMany(() => Message, (message) => message.user)
+    messages?: Message[];
 
     @CreateDateColumn()
     created_at: Date;

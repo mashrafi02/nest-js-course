@@ -49,4 +49,8 @@ export class UsersService{
 
         return this.usersRepository.remove(user);
     }
+
+    public async FindUserById(id: number){
+        return await this.usersRepository.findOneBy({ id });
+    }
 }
