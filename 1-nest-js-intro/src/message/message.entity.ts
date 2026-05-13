@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Users } from "../users/users.entity";
+import { Hashtag } from "../hashtag/hashtag.entity";
 
 
 @Entity()
@@ -27,4 +28,8 @@ export class Message {
 
     @ManyToOne(() => Users, (user) => user.messages)
     user: Users
+
+    @ManyToMany(() => Hashtag)
+    @JoinTable()
+    hashtags?: Hashtag[];
 }

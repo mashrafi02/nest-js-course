@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { ProfileModule } from './profile/profile.module';
+import { HashtagModule } from './hashtag/hashtag.module';
  
 
 
@@ -32,7 +33,7 @@ import { ProfileModule } from './profile/profile.module';
                     },
                 }
               }
-            }), ProfileModule],
+            }), ProfileModule, HashtagModule],
   controllers: [AppController],
   providers: [AppService],
 })
