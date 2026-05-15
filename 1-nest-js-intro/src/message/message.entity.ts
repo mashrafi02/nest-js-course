@@ -31,7 +31,7 @@ export class Message {
 
 
     // for unidirectional many to many relation ship, when the owning side is deleted, the related row in the junction table will also be deleted automatically. we do not need to cascade delete operation manually. but if we want to keep the related row in the junction table, we can set the onDelete option to 'SET NULL' or 'NO ACTION'.
-    @ManyToMany(() => Hashtag)
+    @ManyToMany(() => Hashtag, hashtag => hashtag.messages)
     @JoinTable()
     hashtags?: Hashtag[];
 }

@@ -25,4 +25,12 @@ export class HashtagService {
         });
         return hashtags;
     }
+
+    public async deleteHashtagById(id: number): Promise<void> {
+        await this.hashtagRepository.delete({ id });
+    }
+
+    public async softDeleteHashtagById(id: number): Promise<void> {
+        await this.hashtagRepository.softDelete({ id });
+    }
 }
