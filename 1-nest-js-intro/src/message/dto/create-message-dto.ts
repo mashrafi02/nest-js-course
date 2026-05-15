@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 
 
@@ -15,4 +15,9 @@ export class CreateMessageDto {
     @IsNotEmpty()
     @IsInt()
     userId: number
+
+    @IsOptional()
+    @IsInt({ each: true })
+    @IsArray()
+    hashtags?: number[];
 }

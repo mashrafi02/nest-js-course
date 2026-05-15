@@ -4,10 +4,11 @@ import { MessageService } from './message.service';
 import { UsersModule } from '../users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Message } from './message.entity';
+import { HashtagModule } from '../hashtag/hashtag.module';
 
 @Module({
   controllers: [MessageController],
   providers: [MessageService],
-  imports: [UsersModule, TypeOrmModule.forFeature([Message])],
+  imports: [UsersModule, HashtagModule, TypeOrmModule.forFeature([Message])],
 })
 export class MessageModule {}

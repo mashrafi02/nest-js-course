@@ -4,6 +4,8 @@ import { Message } from './message.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateMessageDto } from './dto/create-message-dto';
 import { UsersService } from '../users/users.service';
+import { HashtagService } from '../hashtag/hashtag.service';
+import { UpdateMessageDto } from './dto/update-message.dto';
 
 @Injectable()
 export class MessageService {
@@ -11,7 +13,9 @@ export class MessageService {
         private readonly usersService: UsersService,
 
         @InjectRepository(Message)
-        private readonly messageRepository: Repository<Message>
+        private readonly messageRepository: Repository<Message>,
+
+        private readonly hasgtagService: HashtagService
     ) {}
 
 
@@ -24,6 +28,7 @@ export class MessageService {
             },
             relations: {
                 user: true,
+                hashtags: true
             },
         });
     }
@@ -34,10 +39,52 @@ export class MessageService {
             throw new NotFoundException('User not found');
         }    
 
+        const hashtags = createMessageDto.hashtags ? await this.hasgtagService.findHashtagByIds(createMessageDto.hashtags) : [];
+
         const message = this.messageRepository.create({
             ...createMessageDto,
-            user
+            user,
+            hashtags
         });
+
         return await this.messageRepository.save(message);
+    }
+
+    public async UpdateMessage(updateMessageDto: UpdateMessageDto){
+        const message = await this.messageRepository.findOne({
+            where: {
+                id: updateMessageDto.id
+            }
+        });
+
+        if(!message){
+            throw new NotFoundException('Message not found');
+        }
+
+        const hashtags = updateMessageDto.hashtags ? await this.hasgtagService.findHashtagByIds(updateMessageDto.hashtags) : [];
+
+        message.text = updateMessageDto.text ?? message.text;
+        message.image = updateMessageDto.image ?? message.image;
+        message.hashtags = hashtags;
+
+        return await this.messageRepository.save(message);
+    }
+
+    public async DeleteMessage(id: number){
+        const message = await this.messageRepository.findOne({
+            where: {
+                id: id
+            }
+        });
+
+        if(!message){
+            throw new NotFoundException('Message not found');
+        }
+
+        await this.messageRepository.delete({id: message.id});
+
+        return {
+            message: 'Message deleted successfully'
+        };
     }
 }
