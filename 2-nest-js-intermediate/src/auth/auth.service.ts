@@ -1,16 +1,22 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
+import authConfig from './config/auth.config';
+import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
     constructor(
         @Inject(forwardRef(() => UsersService))
-        private readonly usersService: UsersService
+        private readonly usersService: UsersService,
+
+        @Inject(authConfig.KEY)
+        private readonly authConfiguration: ConfigType<typeof authConfig>
     ) {}
 
     isAuthenticated: boolean = false;
 
     login(email: string, password: string) {
-        
+        console.log(this.authConfiguration);
+        return {email, password}
     }
 }
