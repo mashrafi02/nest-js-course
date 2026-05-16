@@ -5,11 +5,12 @@ import { UsersModule } from './users/users.module';
 import { MessageModule } from './message/message.module';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ProfileModule } from './profile/profile.module';
 import { HashtagModule } from './hashtag/hashtag.module';
- 
+import { appConfig } from './config/app.config';
 
+const ENV = process.env.NODE_ENV;
 
 @Module({
   imports: [UsersModule,
@@ -17,17 +18,19 @@ import { HashtagModule } from './hashtag/hashtag.module';
             AuthModule,
             ConfigModule.forRoot({
               isGlobal: true,
+              envFilePath: !ENV ? '.env' : `.env.${ENV.trim()}`,
+              load: [appConfig],
             }), 
             TypeOrmModule.forRootAsync({
-              imports: [],
-              inject: [],
-              useFactory: () => {
+              imports: [ConfigModule],
+              inject: [ConfigService],
+              useFactory: (configService: ConfigService) => {
                 return {
                   type: "postgres",
                   // entities: [Users],
-                  url: process.env.DATABASE_URL,
-                  synchronize: true,
-                  autoLoadEntities: true, // this will automatically load all entities from the modules
+                  url: configService.get<string>('database.dbUrl'),
+                  synchronize: configService.get<boolean>('database.synchronize'),
+                  autoLoadEntities: configService.get<boolean>('database.autoLoadEntities'), // this will automatically load all entities from the modules
                   ssl: {
                       rejectUnauthorized: false,
                     },

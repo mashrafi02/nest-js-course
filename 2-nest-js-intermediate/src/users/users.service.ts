@@ -3,7 +3,6 @@ import { Repository } from "typeorm";
 import { Users } from "./users.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CreateUserDto } from "./dtos/createUser.dto";
-import { Profile } from "../profile/profile.entity";
 
 
 @Injectable()
@@ -12,13 +11,13 @@ export class UsersService{
     constructor(
         @InjectRepository(Users)
         private readonly usersRepository: Repository<Users>,
-
-        @InjectRepository(Profile)
-        private readonly profileRepository: Repository<Profile>
     ){}
 
 
     getAllUsers(){
+        const NODE_ENV = process.env.NODE_ENV;
+        console.log('Current Environment:', NODE_ENV);
+
         return this.usersRepository.find({
             relations: {
                 profile: true
