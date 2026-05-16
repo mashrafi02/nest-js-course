@@ -20,6 +20,13 @@ export class MessageService {
 
 
     public async getMessageByUserId(userId: number): Promise<Message[]> {
+
+        const user = await this.usersService.findUserById(userId);
+
+        if(!user){
+            throw new NotFoundException(`User with id ${userId} not found`);
+        }
+        
         return await this.messageRepository.find({
             where: {
                 user: {
@@ -35,8 +42,9 @@ export class MessageService {
 
     public async CreateMessage(createMessageDto: CreateMessageDto){
         const user = await this.usersService.findUserById(createMessageDto.userId);
+
         if(!user){
-            throw new NotFoundException('User not found');
+            throw new NotFoundException(`User with id ${createMessageDto.userId} not found`);
         }    
 
         const hashtags = createMessageDto.hashtags ? await this.hasgtagService.findHashtagByIds(createMessageDto.hashtags) : [];
@@ -58,7 +66,7 @@ export class MessageService {
         });
 
         if(!message){
-            throw new NotFoundException('Message not found');
+            throw new NotFoundException(`Message with id ${updateMessageDto.id} not found`);
         }
 
         const hashtags = updateMessageDto.hashtags ? await this.hasgtagService.findHashtagByIds(updateMessageDto.hashtags) : [];
@@ -78,13 +86,13 @@ export class MessageService {
         });
 
         if(!message){
-            throw new NotFoundException('Message not found');
+            throw new NotFoundException(`Message with id ${id} not found or already deleted`);
         }
 
         await this.messageRepository.delete({id: message.id});
 
         return {
-            message: 'Message deleted successfully'
+            message: `Message with id ${id} deleted successfully`
         };
     }
 }
