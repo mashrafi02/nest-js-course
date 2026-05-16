@@ -10,6 +10,8 @@ import { ProfileModule } from './profile/profile.module';
 import { HashtagModule } from './hashtag/hashtag.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
+import envValidationSchema from './config/env.validation';
+
 
 const ENV = process.env.NODE_ENV;
 
@@ -21,6 +23,7 @@ const ENV = process.env.NODE_ENV;
               isGlobal: true,
               envFilePath: !ENV ? '.env' : `.env.${ENV.trim()}`,
               load: [appConfig, databaseConfig],
+              validationSchema: envValidationSchema,
             }), 
             TypeOrmModule.forRootAsync({
               imports: [ConfigModule],
