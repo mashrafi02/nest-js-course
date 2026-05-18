@@ -1,4 +1,4 @@
-import { NotFoundException, Injectable } from "@nestjs/common";
+import { NotFoundException, Injectable, BadRequestException, HttpException, HttpStatus } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { Users } from "./users.entity";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -26,11 +26,20 @@ export class UsersService{
     }
 
     public async createUser(userDto: CreateUserDto) {
-        
         userDto.profile = userDto.profile ?? {};
 
+        const existingUser = await this.usersRepository.findOne({
+            where: [
+                { username: userDto.username },
+                { email: userDto.email }
+            ]
+        });
+
+        if (existingUser) {
+            throw new BadRequestException('Username or email already exists');
+        }
+        
         const newUser = this.usersRepository.create(userDto);
-      
         return await this.usersRepository.save(newUser);
     }
 
@@ -50,6 +59,16 @@ export class UsersService{
     }
 
     public async findUserById(id: number): Promise<Users | null>{
-        return await this.usersRepository.findOneBy({ id });
+        const user = await this.usersRepository.findOneBy({ id });
+
+        if (!user) {
+            throw new HttpException({
+                status: HttpStatus.NOT_FOUND,
+                error: 'User not found',
+                table: 'users'
+            }, HttpStatus.NOT_FOUND);
+        }
+
+        return user;
     }
 }
