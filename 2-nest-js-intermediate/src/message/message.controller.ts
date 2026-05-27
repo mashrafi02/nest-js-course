@@ -1,15 +1,21 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { CreateMessageDto } from './dto/create-message-dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
+import { PaginationQueryDto } from '../common/pagination/dto/pagination-query.dto';
 
 @Controller('message')
 export class MessageController {
     constructor( private readonly messageService: MessageService) {}
 
     @Get(':userId')
-    getMessageByUserId(@Param('userId', ParseIntPipe) userId: number) {
-        return this.messageService.getMessageByUserId(userId);
+    getMessageByUserId(
+        @Param('userId', ParseIntPipe) userId: number,
+        @Query() paginationQueryDto : PaginationQueryDto
+    ) {
+        // console.log(paginationQueryDto);
+        
+        return this.messageService.getMessageByUserId(userId, paginationQueryDto);
     }
 
     @Post()

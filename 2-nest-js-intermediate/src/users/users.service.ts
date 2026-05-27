@@ -4,6 +4,9 @@ import { Users } from "./users.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CreateUserDto } from "./dtos/createUser.dto";
 import { UserAlreadyExistsException } from "../CustomExceptions/user-already-exists-exception";
+import { PaginationQueryDto } from "../common/pagination/dto/pagination-query.dto";
+import { Paginater } from "../common/pagination/paginater.interface";
+import { PaginationProvider } from "../common/pagination/pagination.provider";
 
 
 @Injectable()
@@ -12,18 +15,19 @@ export class UsersService{
     constructor(
         @InjectRepository(Users)
         private readonly usersRepository: Repository<Users>,
+
+        private readonly paginationProvider: PaginationProvider
     ){}
 
 
-    getAllUsers(){
+    public async getAllUsers(paginationQueryDto: PaginationQueryDto) : Promise<Paginater<Users>>{
         const NODE_ENV = process.env.NODE_ENV;
         console.log('Current Environment:', NODE_ENV);
 
-        return this.usersRepository.find({
-            relations: {
-                profile: true
-            }
-        })
+        return await this.paginationProvider.paginatedQuery<Users>(
+            paginationQueryDto,
+            this.usersRepository
+        );
     }
 
     public async createUser(userDto: CreateUserDto) {
