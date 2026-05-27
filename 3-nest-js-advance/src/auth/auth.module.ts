@@ -1,14 +1,19 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
 import authConfig from './config/auth.config';
 import { ConfigModule } from '@nestjs/config';
+import { HashingProvider } from './provider/hashing.provider';
+import { BcryptProvider } from './provider/bcrypt.provider';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService],
-  // exports: [AuthService],
-  imports: [UsersModule, ConfigModule.forFeature(authConfig)],
+  providers: [AuthService, {
+    provide: HashingProvider,
+    useClass: BcryptProvider
+  }],
+  exports: [AuthService, HashingProvider],
+  imports: [forwardRef(() => UsersModule), ConfigModule.forFeature(authConfig)],
 })
 export class AuthModule {}

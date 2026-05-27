@@ -1,4 +1,4 @@
-import { NotFoundException, Injectable, HttpException, HttpStatus } from "@nestjs/common";
+import { NotFoundException, Injectable, HttpException, HttpStatus, Inject, forwardRef, UnauthorizedException } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { Users } from "./users.entity";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -7,6 +7,7 @@ import { UserAlreadyExistsException } from "../CustomExceptions/user-already-exi
 import { PaginationQueryDto } from "../common/pagination/dto/pagination-query.dto";
 import { Paginater } from "../common/pagination/paginater.interface";
 import { PaginationProvider } from "../common/pagination/pagination.provider";
+import { HashingProvider } from "../auth/provider/hashing.provider";
 
 
 @Injectable()
@@ -16,7 +17,10 @@ export class UsersService{
         @InjectRepository(Users)
         private readonly usersRepository: Repository<Users>,
 
-        private readonly paginationProvider: PaginationProvider
+        private readonly paginationProvider: PaginationProvider,
+
+        @Inject(forwardRef(() => HashingProvider))
+        private readonly hashingProvider: HashingProvider
     ){}
 
 
@@ -54,7 +58,16 @@ export class UsersService{
         }
         
         const newUser = this.usersRepository.create(userDto);
-        return await this.usersRepository.save(newUser);
+        const hashedUser = await this.usersRepository.save(
+            {
+                ...newUser,
+                password: await this.hashingProvider.hashPassword(userDto.password)
+            }
+        );
+
+        delete hashedUser.password;
+
+        return hashedUser;
     }
 
     public async deleteUser(userId: number) {
@@ -85,4 +98,24 @@ export class UsersService{
 
         return user;
     }
+
+    async findUserByUsername(username: string) : Promise<Users | null> {
+        const user = await this.usersRepository.findOne({
+            where: {
+                username: username
+            }
+        });
+
+        if (!user) {
+            throw new UnauthorizedException({
+                status: HttpStatus.UNAUTHORIZED,
+                error: 'User not found',
+                table: 'users'
+            });
+        }
+
+        return user;
+    }
+
+    
 }
