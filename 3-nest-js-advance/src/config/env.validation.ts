@@ -8,5 +8,8 @@ export default Joi.object({
     DATABASE_URL: Joi.string().required(),
     TYPEORM_SYNC: Joi.boolean().required().default(true),
     TYPEORM_AUTO_LOAD_ENTITIES: Joi.boolean().required().default(true),
-    SECRET_KEY: Joi.string().required(),
+    JWT_SECRET_KEY: Joi.string().required(),
+    JWT_EXPIRES_IN: Joi.string().required(),
+    JWT_AUDIENCE: Joi.string().required(),
+    JWT_ISSUER: Joi.string().required(),
 })

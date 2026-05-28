@@ -12,6 +12,10 @@ import { PaginationModule } from './common/pagination/pagination.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import envValidationSchema from './config/env.validation';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthorizeGuard } from './auth/guards/authorize.guard';
+import authConfig from './auth/config/auth.config';
+import { JwtModule } from '@nestjs/jwt';
 
 
 const ENV = process.env.NODE_ENV;
@@ -41,8 +45,20 @@ const ENV = process.env.NODE_ENV;
                     },
                 }
               }
-            }), ProfileModule, HashtagModule, PaginationModule],
+            }), 
+            ProfileModule, 
+            HashtagModule, 
+            PaginationModule,
+            ConfigModule.forFeature(authConfig),
+            JwtModule.registerAsync(authConfig.asProvider())
+          ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+                AppService,
+                {
+                  provide: APP_GUARD,
+                  useClass: AuthorizeGuard,
+                }
+              ],
 })
 export class AppModule {}
