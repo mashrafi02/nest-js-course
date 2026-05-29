@@ -3,6 +3,8 @@ import { Request } from 'express';
 import type { ConfigType } from '@nestjs/config';
 import authConfig from '../config/auth.config';
 import { JwtService } from '@nestjs/jwt';
+import { Reflector } from '@nestjs/core';
+import { REQUEST_USER_KEY } from '../../constants/constants';
 
 type JwtPayload = {
     username: string;
@@ -17,10 +19,23 @@ export class AuthorizeGuard implements CanActivate {
         private readonly jwtService: JwtService,
 
         @Inject(authConfig.KEY)
-        private readonly authConfiguration: ConfigType<typeof authConfig>
+        private readonly authConfiguration: ConfigType<typeof authConfig>,
+
+        private readonly reflector: Reflector
     ){}
 
     async canActivate(context: ExecutionContext): Promise<boolean>{
+
+
+        // check if the route is public
+        const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+
+        if (isPublic) {
+            return true;
+        }
         
         const request: Request = context.switchToHttp().getRequest();
 
@@ -32,7 +47,8 @@ export class AuthorizeGuard implements CanActivate {
 
         try {
             const payload = await this.jwtService.verifyAsync<JwtPayload>(token, this.authConfiguration);
-            console.log(payload);
+            request[REQUEST_USER_KEY] = payload;
+            // console.log(payload);
             
         } catch {
             throw new UnauthorizedException('Invalid token');
