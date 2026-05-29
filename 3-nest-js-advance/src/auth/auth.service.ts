@@ -7,7 +7,12 @@ import { forwardRef } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { HashingProvider } from './provider/hashing.provider';
 import { JwtService } from '@nestjs/jwt';
+import { Users } from '../users/users.entity';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
+type JwtPayload = {
+    sub: number;
+};
 
 @Injectable()
 export class AuthService {
@@ -45,14 +50,51 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        const payload = { username: userExist.username, sub: userExist.id };
-        const token = await this.jwtService.signAsync(payload, {
+        const { accessToken, refreshToken } = await this.generateTokens(userExist);
+
+        return { message: 'Login successful', accessToken, refreshToken };
+    }
+
+    async refreshToken(refreshTokenDto: RefreshTokenDto) {
+
+
+        try {
+            const {sub} = await this.jwtService.verifyAsync<JwtPayload>(refreshTokenDto.refreshToken, {
+                secret: this.authConfiguration.secret,
+                audience: this.authConfiguration.audience,
+                issuer: this.authConfiguration.issuer,
+            });
+
+            const user = await this.usersService.findUserById(sub);
+
+            if (!user) {
+                throw new UnauthorizedException('User not found');
+            }
+
+            const { accessToken, refreshToken } = await this.generateTokens(user);
+
+            return { message: 'Token refreshed successfully', accessToken, refreshToken };
+        } catch (error) {
+            throw new UnauthorizedException('Invalid refresh token', { cause: error });
+        }
+    }
+
+    private async signToken(userId: number, expiresIn: number, payload?: Record<string, unknown>): Promise<string> {
+        const tokenPayload = { sub: userId, ...payload };
+        return await this.jwtService.signAsync(tokenPayload, {
             secret: this.authConfiguration.secret,
-            expiresIn: this.authConfiguration.expiresIn,
+            expiresIn,
             audience: this.authConfiguration.audience,
             issuer: this.authConfiguration.issuer,
         });
+    }
 
-        return { message: 'Login successful', token };
+    private async generateTokens(user: Users): Promise<{ accessToken: string; refreshToken: string }> {
+
+        const accessToken = await this.signToken(user.id, this.authConfiguration.expiresIn, { username: user.username });
+
+        const refreshToken = await this.signToken(user.id, this.authConfiguration.refreshExpiresIn);
+
+        return { accessToken, refreshToken };
     }
 }

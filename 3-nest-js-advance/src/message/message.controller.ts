@@ -1,13 +1,14 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req } from '@nestjs/common';
-import { Request } from 'express';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { CreateMessageDto } from './dto/create-message-dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { PaginationQueryDto } from '../common/pagination/dto/pagination-query.dto';
+import { ActiveUser } from '../auth/decorators/active-user.decorator';
+import type { ActiveUserType } from '../auth/interfaces/active-user.interface';
 
-type AuthenticatedRequest = Request & {
-    user?: unknown;
-};
+// type AuthenticatedRequest = Request & {
+//     user?: unknown;
+// };
 
 @Controller('message')
 export class MessageController {
@@ -24,10 +25,8 @@ export class MessageController {
     }
 
     @Post()
-    createMessage(@Body() createMessageDto: CreateMessageDto, @Req() request: AuthenticatedRequest) {
-        // return this.messageService.CreateMessage(createMessageDto);
-        console.log(request?.user);
-        
+    createMessage(@Body() createMessageDto: CreateMessageDto, @ActiveUser() user: ActiveUserType) {
+        return this.messageService.CreateMessage(createMessageDto, user);
     }
 
     @Patch()

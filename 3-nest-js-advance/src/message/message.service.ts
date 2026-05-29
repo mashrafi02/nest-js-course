@@ -9,6 +9,7 @@ import { UpdateMessageDto } from './dto/update-message.dto';
 import { PaginationQueryDto } from '../common/pagination/dto/pagination-query.dto';
 import { PaginationProvider } from '../common/pagination/pagination.provider';
 import { Paginater } from '../common/pagination/paginater.interface';
+import { ActiveUserType } from '../auth/interfaces/active-user.interface';
 
 @Injectable()
 export class MessageService {
@@ -47,18 +48,17 @@ export class MessageService {
         );
     }
 
-    public async CreateMessage(createMessageDto: CreateMessageDto){
-        const user = await this.usersService.findUserById(createMessageDto.userId);
+    public async CreateMessage(createMessageDto: CreateMessageDto, user: ActiveUserType){
+        const userEntity = await this.usersService.findUserById(user.sub);
 
-        if(!user){
-            throw new NotFoundException(`User with id ${createMessageDto.userId} not found`);
+        if(!userEntity){
+            throw new NotFoundException(`User with id ${user.sub} not found`);
         }    
 
         const hashtags = createMessageDto.hashtags ? await this.hasgtagService.findHashtagByIds(createMessageDto.hashtags) : [];
 
         const message = this.messageRepository.create({
             ...createMessageDto,
-            user,
             hashtags
         });
 
