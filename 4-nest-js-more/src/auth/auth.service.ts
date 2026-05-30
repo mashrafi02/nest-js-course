@@ -91,7 +91,7 @@ export class AuthService {
 
     private async generateTokens(user: Users): Promise<{ accessToken: string; refreshToken: string }> {
 
-        const accessToken = await this.signToken(user.id, this.authConfiguration.expiresIn, { username: user.username });
+        const accessToken = await this.signToken(user.id, this.authConfiguration.expiresIn, { username: user.username, role: user.role });
 
         const refreshToken = await this.signToken(user.id, this.authConfiguration.refreshExpiresIn);
 

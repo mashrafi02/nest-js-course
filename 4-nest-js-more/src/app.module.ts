@@ -16,6 +16,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthorizeGuard } from './auth/guards/authorize.guard';
 import authConfig from './auth/config/auth.config';
 import { JwtModule } from '@nestjs/jwt';
+import { RolesGuard } from './auth/guards/roles.guard';
 
 
 const ENV = process.env.NODE_ENV;
@@ -58,6 +59,10 @@ const ENV = process.env.NODE_ENV;
                 {
                   provide: APP_GUARD,
                   useClass: AuthorizeGuard,
+                },
+                {
+                  provide: APP_GUARD,
+                  useClass: RolesGuard
                 }
               ],
 })

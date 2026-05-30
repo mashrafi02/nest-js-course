@@ -5,6 +5,8 @@ import { UpdateMessageDto } from './dto/update-message.dto';
 import { PaginationQueryDto } from '../common/pagination/dto/pagination-query.dto';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import type { ActiveUserType } from '../auth/interfaces/active-user.interface';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../constants/constants';
 
 // type AuthenticatedRequest = Request & {
 //     user?: unknown;
@@ -34,7 +36,9 @@ export class MessageController {
         return this.messageService.UpdateMessage(updateMessageDto);
     }
     
+    
     @Delete(':id')
+    @Roles(Role.Admin)
     deleteMessage(@Param('id', ParseIntPipe) id: number) {
         return this.messageService.DeleteMessage(id);
     }

@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Profile } from "../profile/profile.entity";
 import { Message } from "../message/message.entity";
+import { Role } from "../constants/constants";
 
 
 @Entity()
@@ -16,6 +17,9 @@ export class Users {
         nullable: false
     })
     username: string;
+
+    @Column({ type: 'enum', enum: Role, default: Role.User })
+    role: Role;
 
     @Column({
         type: 'varchar',

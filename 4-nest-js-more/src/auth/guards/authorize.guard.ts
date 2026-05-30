@@ -4,11 +4,12 @@ import type { ConfigType } from '@nestjs/config';
 import authConfig from '../config/auth.config';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
-import { REQUEST_USER_KEY } from '../../constants/constants';
+import { REQUEST_USER_KEY, Role } from '../../constants/constants';
 
 type JwtPayload = {
     username: string;
     sub: number;
+    role: Role
 };
 
 
