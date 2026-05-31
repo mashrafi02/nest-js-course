@@ -17,6 +17,8 @@ import { AuthorizeGuard } from './auth/guards/authorize.guard';
 import authConfig from './auth/config/auth.config';
 import { JwtModule } from '@nestjs/jwt';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { cloudinaryConfig } from './config/cloudinary.config';
+import { UploadModule } from './upload/upload.module';
 
 
 const ENV = process.env.NODE_ENV;
@@ -28,7 +30,7 @@ const ENV = process.env.NODE_ENV;
             ConfigModule.forRoot({
               isGlobal: true,
               envFilePath: !ENV ? '.env' : `.env.${ENV.trim()}`,
-              load: [appConfig, databaseConfig],
+              load: [appConfig, databaseConfig, cloudinaryConfig],
               validationSchema: envValidationSchema,
             }), 
             TypeOrmModule.forRootAsync({
@@ -51,7 +53,8 @@ const ENV = process.env.NODE_ENV;
             HashtagModule, 
             PaginationModule,
             ConfigModule.forFeature(authConfig),
-            JwtModule.registerAsync(authConfig.asProvider())
+            JwtModule.registerAsync(authConfig.asProvider()),
+            UploadModule
           ],
   controllers: [AppController],
   providers: [

@@ -34,4 +34,8 @@ export class CreateProfileDto {
     @IsOptional()
     @MaxLength(255, {message: 'Profile picture URL must be less than 255 characters long'})
     avatarUrl?: string;
+
+    @IsString()
+    @IsOptional()
+    avatarPublicId?: string; 
 } 

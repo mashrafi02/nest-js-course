@@ -49,6 +49,9 @@ export class Profile {
     })
     avatarUrl: string;
 
+    @Column({ nullable: true })
+    avatarPublicId: string; 
+
     @OneToOne(() => Users, (user) => user.profile)
     user?: Users
 }
