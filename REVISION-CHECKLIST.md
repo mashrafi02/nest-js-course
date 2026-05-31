@@ -116,12 +116,52 @@ Use this as a rapid review sheet before interviews, exams, or project work.
 
 ---
 
+## Chapter 4 - Platform Hardening And Infrastructure
+
+### RBAC
+
+- [ ] Explain `Role` enum design and where role is stored.
+- [ ] Explain `@Roles(...)` decorator metadata flow.
+- [ ] Explain `RolesGuard` role extraction and allow/deny decision.
+- [ ] Explain why both `AuthorizeGuard` and `RolesGuard` are needed.
+
+### Throttling And Abuse Protection
+
+- [ ] Explain `@nestjs/throttler` setup with named windows.
+- [ ] Explain difference between burst window and sustained window limits.
+- [ ] Explain route-level throttle override on login using `@Throttle(...)`.
+- [ ] Explain where to add stricter throttling for refresh-token endpoint.
+
+### Caching With Redis
+
+- [ ] Explain global cache manager setup with Redis store.
+- [ ] Explain custom `CacheProvider` methods and why abstraction helps.
+- [ ] Explain cache key design for paginated users endpoint.
+- [ ] Explain invalidation strategy using pattern delete after mutations.
+- [ ] Explain one risk of stale cache and how to reduce it.
+
+### Cloudinary Upload Pipeline
+
+- [ ] Explain upload flow: interceptor -> validation pipe -> provider -> cloud.
+- [ ] Explain why memory storage is used for direct stream upload.
+- [ ] Explain file validators (size + MIME type).
+- [ ] Explain Cloudinary transformation options used in this project.
+- [ ] Explain why `publicId` is returned and how it enables deletion.
+
+### Configuration Expansion
+
+- [ ] Explain new config namespaces (`cloudinary`, `redis`).
+- [ ] Explain added Joi env validation for cloud and redis vars.
+- [ ] Explain why failing fast at startup helps reliability.
+
+---
+
 ## Cross-Chapter Mastery Checks
 
-- [ ] Compare chapter 1, 2, 3 app.module differences from memory.
+- [ ] Compare chapter 1, 2, 3, 4 app.module differences from memory.
 - [ ] Explain how project evolves from CRUD to production-style API architecture.
 - [ ] Explain tradeoffs of global guard vs per-controller guards.
-- [ ] Explain where to add role-based access control next.
+- [ ] Explain where to add attribute-based access control after RBAC.
 
 ---
 
@@ -131,6 +171,8 @@ Use this as a rapid review sheet before interviews, exams, or project work.
 - [ ] Implement a protected endpoint that returns current active user.
 - [ ] Add an ownership check so only message owner can update or delete.
 - [ ] Add logout token invalidation strategy design (short write-up).
+- [ ] Add Redis cache invalidation for one additional endpoint.
+- [ ] Add a secure avatar replace flow (upload new + delete old by publicId).
 
 ---
 
@@ -140,3 +182,4 @@ Use this as a rapid review sheet before interviews, exams, or project work.
 - [ ] Explain how DTO validation differs from database constraints.
 - [ ] Explain how JWT refresh flow prevents repeated login prompts.
 - [ ] Explain where this project should add tests next and why.
+- [ ] Explain how rate limiting and caching interact under high traffic.

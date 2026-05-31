@@ -1,12 +1,13 @@
 # Nest JS Course Repository
 
-A three-stage NestJS learning path that incrementally evolves from fundamentals to production-style authentication and authorization.
+A four-stage NestJS learning path that incrementally evolves from fundamentals to production-style backend architecture.
 
 This repository contains:
 
 - `1-nest-js-intro` - Core NestJS + TypeORM + DTO validation + basic modular CRUD
 - `2-nest-js-intermediate` - Configuration architecture + env validation + pagination provider + custom exceptions
 - `3-nest-js-advance` - JWT auth flows + global guard + custom decorators + password hashing abstraction
+- `4-nest-js-more` - RBAC + rate limiting + Redis caching + Cloudinary uploads + cache invalidation patterns
 
 ---
 
@@ -17,6 +18,7 @@ The chapters are designed to be completed in order:
 1. **Intro**: Build and understand core NestJS patterns.
 2. **Intermediate**: Add robust config management and reusable infrastructure.
 3. **Advance**: Add secure authentication and authorization architecture.
+4. **More**: Add production-oriented platform capabilities (authorization policy, API hardening, caching, media upload).
 
 ---
 
@@ -27,6 +29,7 @@ nest-js-course/
 ├── 1-nest-js-intro/
 ├── 2-nest-js-intermediate/
 ├── 3-nest-js-advance/
+├── 4-nest-js-more/
 └── README.md
 ```
 
@@ -195,23 +198,83 @@ Chapter 3 builds on chapter 2 and introduces full authentication and authorizati
 
 ---
 
+## Chapter 4: More (`4-nest-js-more`)
+
+Chapter 4 builds on chapter 3 and introduces production-focused concerns around access control, abuse prevention, performance, and media handling.
+
+### RBAC and policy enforcement
+
+- Role system formalized with `Role` enum (`user`, `admin`, `moderator`)
+- Role persisted in `Users` entity and embedded in access token payload
+- `@Roles(...roles)` decorator for route-level role requirements
+- `RolesGuard` added globally alongside `AuthorizeGuard`
+- Admin-only endpoints enforced (for example, delete operations in users/messages)
+
+### API hardening and throttling
+
+- `@nestjs/throttler` integration in auth module
+- Global `ThrottlerGuard` registration within auth module
+- Multiple throttle windows configured (`short` and `long`)
+- Route-level throttle policy for login endpoint using `@Throttle(...)`
+
+### Caching and Redis integration
+
+- `@nestjs/cache-manager` with `cache-manager-redis-yet`
+- Global Redis-backed cache module registration
+- Config-driven Redis connection (`REDIS_HOST`, `REDIS_PORT`)
+- Custom `CacheProvider` abstraction with helper methods:
+  - `get`
+  - `set`
+  - `delete`
+  - `deleteByPattern`
+- Caching applied to paginated users endpoint
+- Cache invalidation by key pattern after user create/delete
+
+### File upload and Cloudinary integration
+
+- Upload module with provider-driven Cloudinary client setup
+- In-memory upload handling via `multer` `memoryStorage`
+- File validation with `ParseFilePipe`:
+  - max size validator
+  - MIME type validator
+- Cloudinary upload stream pipeline from buffer using Node `Readable`
+- Standardized upload response with hosted URL and public id
+
+### Configuration expansion in this chapter
+
+- Added Cloudinary config namespace and envs:
+  - `CLOUDINARY_CLOUD_NAME`
+  - `CLOUDINARY_API_KEY`
+  - `CLOUDINARY_API_SECRET`
+- Added Redis config namespace and envs:
+  - `REDIS_HOST`
+  - `REDIS_PORT`
+- Joi env schema extended to validate all new infra dependencies at startup
+
+---
+
 ## Feature Matrix by Chapter
 
-| Topic | Ch. 1 | Ch. 2 | Ch. 3 |
-|---|---:|---:|---:|
-| Modular architecture | Yes | Yes | Yes |
-| DTO validation | Yes | Yes | Yes |
-| TypeORM entities & relations | Yes | Yes | Yes |
-| Basic CRUD (users/messages/hashtags/profile) | Yes | Yes | Yes |
-| Config namespaces (`registerAs`) | No | Yes | Yes |
-| Joi env schema validation | No | Yes | Yes |
-| Request-scoped pagination provider | No | Yes | Yes |
-| Custom exception class | No | Yes | Yes |
-| JWT authentication | No | No | Yes |
-| Refresh token flow | No | No | Yes |
-| Global authorization guard | No | No | Yes |
-| Custom auth decorators | No | No | Yes |
-| Hashing abstraction/provider pattern | No | No | Yes |
+| Topic | Ch. 1 | Ch. 2 | Ch. 3 | Ch. 4 |
+|---|---:|---:|---:|---:|
+| Modular architecture | Yes | Yes | Yes | Yes |
+| DTO validation | Yes | Yes | Yes | Yes |
+| TypeORM entities and relations | Yes | Yes | Yes | Yes |
+| Basic CRUD (users/messages/hashtags/profile) | Yes | Yes | Yes | Yes |
+| Config namespaces (`registerAs`) | No | Yes | Yes | Yes |
+| Joi env schema validation | No | Yes | Yes | Yes |
+| Request-scoped pagination provider | No | Yes | Yes | Yes |
+| Custom exception class | No | Yes | Yes | Yes |
+| JWT authentication | No | No | Yes | Yes |
+| Refresh token flow | No | No | Yes | Yes |
+| Global authorization guard | No | No | Yes | Yes |
+| Role-based authorization (`@Roles`, `RolesGuard`) | No | No | No | Yes |
+| Throttling and rate limiting | No | No | No | Yes |
+| Redis-backed caching | No | No | No | Yes |
+| Cache invalidation patterns | No | No | No | Yes |
+| Cloudinary media upload pipeline | No | No | No | Yes |
+| Custom auth decorators | No | No | Yes | Yes |
+| Hashing abstraction/provider pattern | No | No | Yes | Yes |
 
 ---
 
@@ -239,6 +302,12 @@ npm install
 npm run start:dev
 ```
 
+```bash
+cd ../4-nest-js-more
+npm install
+npm run start:dev
+```
+
 ### Test commands (inside each chapter)
 
 ```bash
@@ -255,13 +324,17 @@ npm run test:cov
 2. Re-implement chapter 2 pagination and config from memory.
 3. In chapter 3, trace the full auth request lifecycle:
    - login -> token generation -> guard verification -> active user injection.
-4. After chapter 3, extend one module (for example, message updates by owner only) to practice auth + domain constraints together.
+4. In chapter 4, trace the policy chain end-to-end:
+  - JWT claims -> AuthorizeGuard -> RolesGuard -> route access decision.
+5. Practice infra concerns by implementing one extension in chapter 4:
+  - cache invalidation strategy refinement, or
+  - upload delete workflow with Cloudinary public id ownership checks.
 
 ---
 
 ## Notes
 
-- All three chapter folders are intentionally separate projects, not a single monorepo package.
+- All four chapter folders are intentionally separate projects, not a single monorepo package.
 - Shared naming and structure make it easier to compare patterns chapter-by-chapter.
 - The repository progression emphasizes architecture and backend API design over frontend integration.
 
