@@ -5,7 +5,7 @@ import { UsersModule } from './users/users.module';
 import { MessageModule } from './message/message.module';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config';
 import { ProfileModule } from './profile/profile.module';
 import { HashtagModule } from './hashtag/hashtag.module';
 import { PaginationModule } from './common/pagination/pagination.module';
@@ -19,6 +19,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { cloudinaryConfig } from './config/cloudinary.config';
 import { UploadModule } from './upload/upload.module';
+import { redisConfig } from './config/redis.config';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
+import { AppCacheModule } from './cache/cache.module';
 
 
 const ENV = process.env.NODE_ENV;
@@ -30,7 +34,7 @@ const ENV = process.env.NODE_ENV;
             ConfigModule.forRoot({
               isGlobal: true,
               envFilePath: !ENV ? '.env' : `.env.${ENV.trim()}`,
-              load: [appConfig, databaseConfig, cloudinaryConfig],
+              load: [appConfig, databaseConfig, cloudinaryConfig, redisConfig],
               validationSchema: envValidationSchema,
             }), 
             TypeOrmModule.forRootAsync({
@@ -54,7 +58,21 @@ const ENV = process.env.NODE_ENV;
             PaginationModule,
             ConfigModule.forFeature(authConfig),
             JwtModule.registerAsync(authConfig.asProvider()),
-            UploadModule
+            UploadModule,
+            CacheModule.registerAsync({
+              isGlobal: true,       // available in every module without importing
+              useFactory: async (config: ConfigType<typeof redisConfig>) => ({
+                store: await redisStore({
+                  socket: {
+                    host: config.host,
+                    port: config.port,
+                  },
+                }),
+                ttl: 60 * 1000,     // default TTL: 60 seconds (in ms)
+              }),
+              inject: [redisConfig.KEY],
+            }),
+            AppCacheModule
           ],
   controllers: [AppController],
   providers: [

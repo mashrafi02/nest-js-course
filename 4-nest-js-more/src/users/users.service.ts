@@ -8,6 +8,7 @@ import { PaginationQueryDto } from "../common/pagination/dto/pagination-query.dt
 import { Paginater } from "../common/pagination/paginater.interface";
 import { PaginationProvider } from "../common/pagination/pagination.provider";
 import { HashingProvider } from "../auth/provider/hashing.provider";
+import { CacheProvider } from "../auth/provider/cache.provider";
 
 
 @Injectable()
@@ -20,7 +21,9 @@ export class UsersService{
         private readonly paginationProvider: PaginationProvider,
 
         @Inject(forwardRef(() => HashingProvider))
-        private readonly hashingProvider: HashingProvider
+        private readonly hashingProvider: HashingProvider,
+
+        private readonly cacheProvider: CacheProvider,
     ){}
 
 
@@ -28,10 +31,23 @@ export class UsersService{
         const NODE_ENV = process.env.NODE_ENV;
         console.log('Current Environment:', NODE_ENV);
 
-        return await this.paginationProvider.paginatedQuery<Users>(
+        const cacheKey = `users:page=${paginationQueryDto.page}:limit=${paginationQueryDto.limit}`;
+
+        // 1. check cache
+        const cached = await this.cacheProvider.get<Paginater<Users>>(cacheKey);
+        if (cached) {
+        console.log('cache hit ✓');
+            return cached;
+        }
+
+        const result = await this.paginationProvider.paginatedQuery<Users>(
             paginationQueryDto,
             this.usersRepository
         );
+
+        await this.cacheProvider.set(cacheKey, result, 60 * 1000)
+
+        return result
     }
 
     public async createUser(userDto: CreateUserDto) {
@@ -67,6 +83,8 @@ export class UsersService{
 
         delete hashedUser.password;
 
+        await this.cacheProvider.deleteByPattern('users:*');
+
         return hashedUser;
     }
 
@@ -82,7 +100,9 @@ export class UsersService{
             throw new NotFoundException('User not found');
         }
 
-        return this.usersRepository.remove(user);
+        await this.usersRepository.remove(user);
+
+        await this.cacheProvider.deleteByPattern('users:*');
     }
 
     public async findUserById(id: number): Promise<Users | null>{

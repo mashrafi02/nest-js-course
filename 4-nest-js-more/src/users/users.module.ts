@@ -9,6 +9,7 @@ import { AuthModule } from "../auth/auth.module";
 import { ConfigModule } from "@nestjs/config";
 import authConfig from "../auth/config/auth.config";
 import { JwtModule } from "@nestjs/jwt";
+import { AppCacheModule } from "../cache/cache.module";
 
 
 @Module({
@@ -20,7 +21,8 @@ import { JwtModule } from "@nestjs/jwt";
                 PaginationModule,
                 forwardRef(() => AuthModule),
                 ConfigModule.forFeature(authConfig),
-                JwtModule.registerAsync(authConfig.asProvider())
+                JwtModule.registerAsync(authConfig.asProvider()),
+                AppCacheModule
             ]
 })
 export class UsersModule {
